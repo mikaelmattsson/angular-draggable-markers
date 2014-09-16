@@ -4,6 +4,14 @@ angular.module('app').
       restrict: 'A',
       link: function(scope, elm, attrs) {
         var startX, startY, initialMouseX, initialMouseY;
+
+        if (typeof attrs.draggableModel != 'undefined') {
+            scope.$watch(attrs.draggableModel, function() {
+                var mx = scope[attrs.draggableModel].x;
+                var my = scope[attrs.draggableModel].y
+                setPosition(mx, my);
+            }, true);
+        }
  
         elm.bind('mousedown', function($event) {
           elm.addClass('dragging');
@@ -21,17 +29,22 @@ angular.module('app').
           var dy = $event.clientY - initialMouseY;
           var p = elm.parent();
           var ex = limitPosition((startX + dx) / p.width() * 100);
-          var ey = limitPosition((startY + dy) / p.height() * 100)
-          elm.css({
-            left:  ex + '%',
-            top: ey + '%'
-          });
-          if(typeof attrs.draggableModel != 'undefined'){
+          var ey = limitPosition((startY + dy) / p.height() * 100);
+          if (typeof attrs.draggableModel != 'undefined') {
             scope[attrs.draggableModel].x = ex;
             scope[attrs.draggableModel].y = ey;
             scope.$apply();
+          } else {
+            setPosition(ex, ey);
           }
           return false;
+        }
+
+        function setPosition(x,y) {
+          elm.css({
+            left:  x + '%',
+            top: y + '%'
+          });
         }
 
         function limitPosition(pos) {
